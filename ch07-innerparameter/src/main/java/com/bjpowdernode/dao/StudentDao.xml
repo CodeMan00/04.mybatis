@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bjpowdernode.dao.StudentDao">
+    <!--
+           两个内置参数：
+                    mybatis默认还有两个内置参数可以用来判断，取值。
+                        _parameter:代表整个参数
+                            单个参数：_parameter就代表这个参数
+                            多个参数：参数会被封装为一个map：_parameter 就是代表这个map
+
+                        _databaseId:如果配置了databaseIdProvider标签。
+                            _databaseId就是代表当前数据库的别名
+    -->
+    <select id="getStudentsTestInnerParameter" resultType="com.bjpowdernode.domain.Student">
+
+        <!--    bind标签    绑定
+             可以将OGNL表达式的值绑定到一个变量中，方便后来引用这个变量的值。
+ -->
+        <!--bind标签的使用，如果我们想要给参数拼接一些字符，我们可以使用  ''+${}+'' 的形式进行拼接
+        但是使用$是有安全问题的，所以我们使用bind可以进行拼接操作。
+                属性：
+                      value：可以获取传递来的参数，然后根据实际进行拼接
+                      name：把拼接后的结果，使用name来表示，modifyName表示的就是拼接后的结果，使用modifyName来获取拼接后的变量值。-->
+        <bind name="modifyName" value="'%'+name+'%'"/>
+
+        <!-- 这里我只是模拟_databaseId的使用，不能执行，因为我没有在主配置文件中配置databaseIdProvider标签。
+            并且我也没有安装oracle数据库-->
+        <if test="_databaseId =='mysql'">
+            select * from student where name = #{_parameter.name}
+        </if>
+        <if test="_databaseId == 'oracle'">
+            select * from department
+        </if>
+    </select>
+
+
+    <!--    bind 绑定
+                可以将OGNL表达式的值绑定到一个变量中，方便后来引用这个变量的值。
+    -->
+
+</mapper>

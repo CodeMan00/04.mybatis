@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bjpowdernode.dao.StudentDao">
+
+<!--    if标签
+            <if:test="使用参数java对象的属性值作为判断条件", 语法:属性值=XXX>
+-->
+    <select id="selectStudentIf" resultType="com.bjpowdernode.domain.Student">
+        select * from student
+        <!--加上1=1的目的就是,如果name中的if语句不满足条件,那么name=#{name}就无法加入到where子句中,但是age中的if语句满足条件,
+         会把if中的or age = #{age} 加入到where子句中,那么就出现了一个语法错误,多一个or,所以我们通过加上1=1的这样的操作,即使
+         age中的if中的式子加入到了where子句中,也是语法正确的,不会报错.-->
+        where 1=1
+        <!-- test值的name是student对象中的属性,if标签内的name是数据库表中的列名,#{name}表示的是获取student中的name属性的值-->
+        <if test="name != null and name !='' ">
+            name = #{name}
+        </if>
+
+        <if test="age > 0">
+            or age > #{age}
+        </if>
+    </select>
+
+<!--    where标签的使用
+            用法:
+                <where> <if></if> ... </where>
+            特点:
+                解决了if标签中sql语句的语法错误问题,在本例中,如果第一个条件不满足,第二个条件满足
+                where标签就会去除第二个sql语句中的 or ,避免了发生了语法错误.如果where中的if条件
+                都不满足,那么生成的sql语句就不会有where子句.
+-->
+    <select id="selectStudentWhere" resultType="com.bjpowdernode.domain.Student">
+        select * from student
+        <where>
+            <if test="name != null and name !='' ">
+                name = #{name}
+            </if>
+
+            <if test="age > 0">
+                or age > #{age}
+            </if>
+        </where>
+    </select>
+
+
+<!--    trim标签的使用：
+         用法：<trim> <if></if> </trim>
+         特点：
+            where标签可以解决连接sql语句的关键字的去除问题，但是他只能解决关键字在if语句的前面的情况下，
+            如果sql连接的关键字在if标签中的sql语句的后面，那么就无效了。此时我们可以通过trime标签来解决。
+
+         trime属性：
+            prefix：前缀，就是给下面if中拼接成的sql语句指定一个前缀。
+            prefixOverrides：前缀覆盖，去掉整个字符串前面多余的字符
+            suffix：后缀，给拼串后的整个字符串加上后缀
+            suffixOverrides：后缀覆盖：去掉整个字符串后面多余的字符。
+-->
+    <select id="selectStudentTrim" resultType="com.bjpowdernode.domain.Student">
+        select * from student
+        <trim   prefix="where"  suffixOverrides="and">
+           <if test="name!=null">
+               name = #{name} and
+           </if>
+           <if test="age != 0">
+                age = #{age} and
+           </if>
+           <if test="email !=null">
+               email = #{email}
+           </if>
+        </trim>
+    </select>
+
+
+<!--    choose标签的使用：
+
+    -->
+
+    <select id="selectStudentChoose" resultType="com.bjpowdernode.domain.Student">
+        select * from student
+        <where>
+            <!-- 从上到下，如果第一条的when标签的条件满足了，就不往下执行了，否则一直执行到
+            otherwise标签内的内容。  这就相当于java中的switch语句，只会满足其中一条。-->
+            <choose>
+                <when test="id !=null">
+                    id=#{id}
+                </when>
+                <when test="name != null">
+                    name = #{name}
+                </when>
+                <when test="email !=null">
+                    email = #{email}
+                </when>
+                <otherwise>
+                <!-- 如果上面的条件都不满足，就执行这条语句，这条语句就是查所有的意思-->
+                    1=1
+                </otherwise>
+            </choose>
+        </where>
+    </select>
+
+
+
+<!--    set标签与if标签结合的使用-->
+    <update id="updateStudent">
+        update student
+        <!--   如果不使用set标签，那么if标签中带有的 逗号 就没法去掉，set标签可以把多余的逗号去掉，保证语法的正确。
+                我们还可以通过trim标签进行操作。
+        -->
+        <!---->
+        <trim prefix="set" suffixOverrides=",">
+        <!-- <set>-->
+            <if test="name!=null">
+                name = #{name},
+            </if>
+            <if test="email!=null">
+                email = #{email},
+            </if>
+            <if test="age !=null">
+                age = #{age}
+            </if>
+        <!-- </set>-->
+        </trim>
+        where id = #{id}
+    </update>
+
+
+
+
+
+<!--    foreach 循环java中的数组,list集合的.主要用在sql的in语句中.
+                list类型的参数会特殊处理封装到map中，map的key就叫list
+           例如: select * from student where id in(1,2,3,4);这时我们可以把id存入到集合中.
+
+        语法规则:
+            collection:表示接口方法中参数的类型,如果是数组使用array,是list集合使用list
+            item:自定义的,表示数组和集合成员的变量
+            open:循环开始时的字符
+            close:循环结束时的字符
+            separator:集合成员之间的分隔符
+            index:索引，遍历list的时候index就是索引，item就是当前值，如果遍历map的时候，index表示的就是map的
+                    key，item就是map的值。
+            #{变量名} 就能取出变量的值也就是当前遍历出的元素。
+
+
+-->
+
+    <select id="selectForeachOne" resultType="com.bjpowdernode.domain.Student">
+        select * from student where id in
+        <foreach collection="list" item="id" open="(" close=")" separator="," >
+            #{id}
+        </foreach>
+    </select>
+
+
+<!--    foreach使用方式二  -->
+    <select id="selectForeachTwo" resultType="com.bjpowdernode.domain.Student">
+
+        <!--引用sql代码片段-->
+        <include refid="inSql"/>
+        <foreach collection="list" item="stu" open="(" close=")" separator=",">
+            #{stu.id}
+        </foreach>
+    </select>
+
+<!--   foreach标签进行批量保存  方式一：
+        mysql支持values(),(),()语法-->
+<!--    <insert id="addStudnets">-->
+<!--        insert into student(name,email,age)-->
+<!--        values-->
+<!--        <foreach collection="students" item="student" separator=",">-->
+<!--            (#{student.name},#{student.email},#{student.age})-->
+<!--        </foreach>-->
+<!--    </insert>-->
+
+
+    <!--   foreach标签进行批量保存  方式二：
+        jdbc:mysql://localhost:3306/mybatis?allowMultiQueries=true在数据库连接信息中的url上面加上
+        allowMultiQueries=true表示数据库开启批量执行。可以在sql语句后携带分号，实现多语句执行。可以执行批处理，同时发出多个SQL语句。
+    -->
+    <insert id="addStudnets">
+        <foreach collection="students" item="student" separator=";">
+            insert into student(name,email,age)
+            values
+            (#{student.name},#{student.email},#{student.age})
+        </foreach>
+    </insert>
+
+<!--    第二种方式,可以自己加上小括号,无需使用open和close属性-->
+<!--    <select id="selectForeachTwo" resultType="com.bjpowdernode.domain.Student">-->
+<!--        select * from student where id in (-->
+<!--        <foreach collection="list" item="stu"  separator=",">-->
+<!--            #{stu.id}-->
+<!--        </foreach>-->
+<!--        )-->
+<!--    </select>-->
+
+
+
+<!--    sql代码片段:
+            就是我们对于那些经常使用的sql语句,定义成代码片段,以后在使用的时候,可以不需要重复编写了,只需要引用这个代码片段.
+
+        步骤:
+            1.先定义 <sql id = "唯一值"> sql语句/表名/字段 </sql>
+            2.使用. 在<select>内通过<include refid="sql代码片段的id">
+-->
+    <sql id="inSql">
+        select * from student where id in
+    </sql>
+
+    <select id="selectAll" resultType="com.bjpowdernode.domain.Student">
+        select * from student order by id
+    </select>
+</mapper>

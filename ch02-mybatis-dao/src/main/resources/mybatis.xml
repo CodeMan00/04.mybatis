@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+
+    <settings>
+        <setting name="logImpl" value="STDOUT_LOGGING"/>
+    </settings>
+    <environments default="">
+        <environment id="">
+            <transactionManager type="JDBC"/>
+            <dataSource type="POOLED">
+                <property name="driver" value="com.mysql.jdbc.Driver"/>
+                <property name="url" value="jdbc:mysql://localhost:3306/mybatis"/>
+                <property name="username" value="root"/>
+                <property name="password" value="123456"/>
+            </dataSource>
+        </environment>
+    </environments>
+
+<!--    databaseIdProvider：支持多数据库厂商
+            type："DB_VENDOR", VendorDatabaseIdProvider，作用就是得到数据库厂商的驱动。
+            DB_VENDOR 会通过 DatabaseMetaData#getDatabaseProductName() 返回的数据库厂商的名称。
+            我们可以在sql语句中，如<select>中，通过databaseId属性指定我们在哪个厂商的数据库里执行该sql语句。
+            databaseId属性的值就是我们在property表中的value值。
+
+        注意：如果配置了 databaseIdProvider，MyBatis 会加载所有的不带 databaseId 或匹配当前 databaseId 的语句；
+        如果同一个方法既有带了databaseId标识的sql标签，还有不带databaseId标识的sql标签，则不带databaseId会被忽略。
+-->
+    <databaseIdProvider type="DB_VENDOR">
+<!--        property是为了给不同的厂商起别名，减少输入的代码量
+            name属性就是厂商的名称，value说就是我们定义的别名
+-->
+        <property name="MySQL" value="mysql"/>
+        <property name="Oracle" value="oracle"/>
+        <property name="SQL Server" value="sqlserver"/>
+    </databaseIdProvider>
+
+
+    <mappers>
+<!--        mapper：注册一个sql映射
+              注册配置文件模式：
+                1。resource: 引用类路径下的文件，类路径也就是src下
+                2.url:引用网络路径或者磁盘路径下的文件
+              注册接口模式：
+                class: 引用我们定义的接口。这种方式要求，xml文件必须和接口在同一个包中，而且它们的名称必须相同。
+                如果我们不想把mapper.xml文件和接口放在同一包中，那么我们可以把所有的sql都是利用注解写在接口中的方法上
+                ，这时就不需要sql映射文件，
+-->
+        <mapper resource="com/bjpowdernode/dao/StudentDao.xml"/>
+<!--        批量注册mapper 这种方式需要把mapper.xml文件和接口在同一个包内，文件名和接口名也必须相同-->
+        <package name="com.bjpowdernode.dao"/>
+    </mappers>
+</configuration>

@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bjpowdernode.dao.StudentDao">
+
+<!--    parameterType表示是dao接口方法中的参数的数据类型
+                   值为全限定类名或者mybatis定义的别名，具体的别名可以看mybatis的官方文档。
+        注意:parameterType这个属性可有可无，不是必须要带的。mybatis通过反射机制，能够发现接口参数的
+            数据类型，所以可以没有，一般我们不写。-->
+
+
+    <select id="selectStudentById" parameterType="java.lang.Integer" resultType="com.bjpowdernode.domain.Student">
+        select * from student where id = #{id}
+    </select>
+
+
+<!--    传递多个参数进行数据库表的查询，{}内的表示要和dao接口中的@Param中的标识符保持一致。-->
+    <select id="selectMultiParam" resultType="com.bjpowdernode.domain.Student">
+        select * from student where name = #{myname} and age = #{myage}
+    </select>
+
+
+<!--    多个参数，通过java对象的属性值 作为参数实际值
+    使用对象语法：
+        #{属性名,javaType=类型名称,jdbcType=数据类型}  这是比较完整的一种写法。
+        javaType :表示java中的属性的数据类型
+        jdbcType ：参数在数据库中的数据类型，这个如果我们可以通过官方文档查看具体的类型。
+
+    通常我们不使用上面的方式，我们对其进行简化，简化后：#{属性名}   javaType,jdbcType省去不写,
+    它们的值mybatis可以通过java反射进行获取，不用我们提供。
+    通过这种方式的参数获取语法：
+            #{}括号内是参数对象的属性名。
+-->
+
+<!--    完整版写法-->
+<!--    <select id="selectMutiObject" resultType="com.bjpowdernode.domain.Student">-->
+<!--        select * from student where name = #{paramName,javaType=java.lang.String,jdbcType=VARCHAR}-->
+<!--        and age = #{paramAge,javaType=java.lang.Integer,jdbcType=INTEGER}-->
+<!--    </select>-->
+
+<!--    简化版写法-->
+        <select id="selectMutiObject" resultType="com.bjpowdernode.domain.Student">
+            select * from student where name = #{paramName} and age = #{paramAge}
+        </select>
+
+
+<!--   方式三： 多个参数，按照位置进行传值
+       #{arg0}  表示接口方法中的第一参数，
+       #{arg1}  表示接口方法中的第二个参数
+-->
+    <select id="selectMultiPosition" resultType="com.bjpowdernode.domain.Student">
+        select * from student where name = #{arg0} and age = #{arg1}
+    </select>
+
+
+<!--    方式四：多个参数，通过map进行传值
+        使用语法：
+            #{map的key}
+-->
+    <select id="selectMultiMap" resultType="com.bjpowdernode.domain.Student">
+        select * from student where name = #{name} and age = #{age}
+    </select>
+
+
+<!--    使用${}的方式来获取参数信息，这种方式是通过字符串的拼接来把参数合成到我们的sql语句的，
+        例如：String sql = " select * from student where id = " + "1"
+        它底层是使用的Statement对象执行sql，效率比Preparedment要低。
+
+        #{}的其他用法：
+            jdbcType一般不需要设置，但是如果当值为null时，有些数据库可能不能识别mybatis对null的处理，
+            mybatis默认将null设置为JdbcType OTHER类型，这种类型mysql是支持的，但是oracle是不支持的
+            所以访问oracle时会报错。
+
+            由于全局配置中， jdbcTypeForNull=OTHER,oracle不支持；
+            解决办法：
+                  法1.当某些字段的取值为null时，我们可以使用#{email,jdbcType=null}这样的形式把可以为null
+                    的值，转换为jdbcType.NULL类型，而不是OTHER类型。
+                  法2.修改全局配置文件  jdbcTypeForNull = NULL
+
+-->
+    <select id="selectStudentBy$" resultType="com.bjpowdernode.domain.Student">
+        select  * from student where name = ${name}
+    </select>
+</mapper>

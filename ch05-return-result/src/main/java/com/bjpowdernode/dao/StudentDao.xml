@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bjpowdernode.dao.StudentDao">
+
+<!--    returnType的值是使用的我们在主配置文件中的自定义别名-->
+    <select id="selectStudentById"  resultType="student">
+        select * from student where id = #{id}
+    </select>
+
+
+
+    <select id="selectMultiParam" resultType="com.bjpowdernode.domain.Student">
+        select * from student where name = #{myname} and age = #{myage}
+    </select>
+
+<!--    returnType的值 int是一个别名，这个mybatis官方文档中有，也可以是全限定类名，
+            推荐使用全限定名称
+
+        同时我们还可以给我们自定义得类起别名，这样减少代码的书写。在mybatis的主配置文件中定义。
+   -->
+    <select id="countStudent" resultType="int">
+        select count(*) from student
+    </select>
+
+
+<!--    resultType这里使用的是别名，推荐使用全限定类名
+
+        返回结果是map
+        1.列名是map的key，列值是map的value
+        2.返回结果为一条记录的情况下，才能使用map进行封装数据。否则抛出异常
+
+-->
+    <select id="selectMapById" resultType="map">
+        select id,name,email from student where id  = #{id}
+    </select>
+    
+    
+
+
+<!--    定义resultMap
+            1.id:自定义名称,表示你定义的这个resultMap
+            2.type:java类型的全限定名
+-->
+    <resultMap id="map" type="com.bjpowdernode.domain.Student">
+<!--        列名和java属性的关系
+                   1.主键列,使用id标签, column是列名,property是java类型的属性名
+-->
+        <id column="id" property="id"/>
+<!--        非主键列,使用result标签-->
+        <result column="name" property="name"/>
+        <result column="email" property="email"/>
+        <result column="age" property="age"/>
+
+    </resultMap>
+    <!--    如何使用resultMap
+ 1.定义resultMap
+ 2.在select标签，使用resultMap来引用步骤1的定义.
+
+ 当列名和类的属性名不一致的时候,我们可以通过这种方式来赋值.
+-->
+    <select id="selectAllStudents" resultMap="map">
+        select * from student
+    </select>
+
+<!--    列名和属性名不一致的第二种处理方法
+            我们通过给数据库表中的列起别名的方式,确保和我们自定义的属性名相同.
+-->
+    <select id="selectAllMyStudents" resultType="com.bjpowdernode.domain.MyStudent">
+        select id as stuid, name as stuname,email as stumail, age as stuage from student
+    </select>
+
+
+<!--    第一种like ,Java代码中指定like的内容-->
+    <select id="selectLikeOne" resultType="com.bjpowdernode.domain.Student">
+        select * from student where name like #{last_name}
+    </select>
+
+<!--    第二种like方式,  在mapper文件中拼接like的内容-->
+    <select id="selectLikeTwo" resultType="com.bjpowdernode.domain.Student">
+        select * from student where name like "%" #{name} "%";
+    </select>
+
+
+    <!--    属性对象映射方式一：-->
+
+<!--    查询Student的同时查询员工对应的部门  一个员工与之有一个对应的部门信息
+        在result中，因为department是student类中的一个属性对象，我们需要sql语句从中
+        取出department的属性信息，通过department.属性名为其属性赋值。
+        注意：department是Student类中的一个成员，不是任意定义的，需要和
+               Student中Department的引用名保持一致。
+-->
+    <resultMap id="mymap" type="com.bjpowdernode.domain.Student">
+        <id column="id" property="id"></id>
+        <result column="name" property="name"></result>
+        <result column="email" property="email"></result>
+        <result column="age" property="age"></result>
+        <result column="did" property="department.id"></result>
+        <result column="dname" property="department.name"></result>
+    </resultMap>
+
+    <select id="selectStudentAndDepartment" resultMap="mymap2">
+        select s.id id, s.name name,s.email mail, s.age age, d.id did,d.name dname from student s,department d
+        where s.id = d.id and s.id = #{id}
+    </select>
+
+
+    <resultMap id="mymap2" type="com.bjpowdernode.domain.Student">
+        <id column="id" property="id"></id>
+        <result column="name" property="name"></result>
+        <result column="email" property="email"></result>
+        <result column="age" property="age"></result>
+<!--        association 标签可以指定联合的javaBean对象
+               属性：
+                property：表示的是Student类中的Deparment类的引用名，在此案例中就是department,
+                            它是指定Student类中哪个属性是联合对象
+                javaType: 表示的是这个属性对象的数据类型。【不能省略的】
+-->
+        <association property="department" javaType="com.bjpowdernode.domain.Department">
+<!--            property 表示对应的JavaBean中的属性名-->
+            <id column="did" property="id"></id>
+            <result column="dname" property="name"></result>
+        </association>
+    </resultMap>
+
+<!--    属性对象映射方式二：  使用association进行分布查询：
+               步骤：
+                    1. 先从studnet表中根据student的id查询出对应的学生记录
+                    2. 根据student中的d_id 查询department表中对应的记录
+                    3. 对查询结果进行封装。
+    -->
+
+    <resultMap id="mymap3" type="com.bjpowdernode.domain.Student">
+<!--        column是表中的列名，或者是列的别名   property是javabean对象的属性名-->
+        <id column="id" property="id"></id>
+        <result column="name"  property="name"></result>
+        <result column="email" property="email"></result>
+        <result column="age" property="age"></result>
+
+<!--        association定义关联对象的封装规则
+            property：是student类中属性对象的引用
+            select:调用department中的xml中的select标签，值是接口的全限定名加上需要引用的select标签的id
+            column：指定将上面的查询结果中的哪一列的值传给这个方法来作为参数，它的值也就是列名。
+-->
+        <association property="department"
+                     select="com.bjpowdernode.dao.DepartmentDao.selectDepartmentById"
+                     column="d_id">
+        </association>
+    </resultMap>
+    <select id="selectStudentAndDepartment2" resultMap="mymap3">
+        select * from student where id = #{id}
+    </select>
+
+<!--    如果当在我们查询数据库，如果此表和其他的表进行了关联，当我们查询此表时，被关联得表也会被查询出来，
+        但是我们可能并不需要被关联的表的信息，此时我们可以通过懒加载的形式，在需要被关联的表信息时，在进行
+        查询，减少对数据库的额外操作。
+
+        步骤:
+          此步骤是建立在分段查询的基础上，在进行分段查询时，我们通过懒加载（在主配置文件中，配置两个设置），
+          对我们需要的数据从数据库中查询，对我们暂时不需要的数据（关联的表数据），暂时不查询的原则，减少了
+          对数据库的额外的访问，提高了效率。
+-->
+
+
+<!--    ===========================================================================-->
+<!--    查询部门的时候将部门的所有的员工信息也查询出来-->
+<!--    List<Student> getStudentsByDeptId(Integer depid);-->
+    <select id="getStudentsByDeptId" resultType="com.bjpowdernode.domain.Student">
+        select * from student where d_id = #{departmentId}
+    </select>
+
+
+    <resultMap id="mymap10" type="com.bjpowdernode.domain.Student">
+        <id column="id" property="id"></id>
+        <result column="name" property="name"></result>
+        <result column="email" property="email"></result>
+        <result column="age" property="age"></result>
+
+
+        <!--  鉴别器，mybatis可以使用discriminator判断某列的值，然后根据某列的值改变封装行为  -->
+        <!--column：指定判断的列名
+            javaType: 列值对应的java类型
+        -->
+        <discriminator javaType="string" column="name">
+<!--            部门号为1的情况
+            value:是d_id对应的值
+            resultType:指定封装的结果类型
+-->
+            <case value="张三" resultType="com.bjpowdernode.domain.Student">
+                <association property="department"
+                             select="com.bjpowdernode.dao.DepartmentDao.selectDepartmentById"
+                             column="d_id">
+                </association>
+            </case>
+<!--            部门号为2的情况,把name赋值给email属性-->
+            <case value="李四" resultType="com.bjpowdernode.domain.Student" >
+                <id column="id" property="id"></id>
+                <result column="name" property="name"></result>
+                <result column="name" property="email"></result>
+                <result column="age" property="age"></result>
+            </case>
+        </discriminator>
+    </resultMap>
+
+    <select id="getStudnetByIdStep" resultMap="mymap10">
+        select * from student where name = #{name}
+    </select>
+</mapper>

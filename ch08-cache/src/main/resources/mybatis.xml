@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+<!--    指定数据库连接信息的properties文件的位置,从类路径下开始找文件-->
+    <properties resource="datasource.properties"/>
+
+<!--    settings:控制mybatis全局行为-->
+    <settings>
+<!--        开启二级缓存，也就是全局缓存-->
+        <setting name="cacheEnabled" value="true"/>
+<!--        设置mybatis输出日志-->
+        <setting name="logImpl" value="STDOUT_LOGGING"/>
+
+<!--  mapUnderSforeToCamelCaseEnables设置下划转驼峰命名
+这个设置的意思就是如果我们数据库表中定义的字段为last_name,那么它可以与java对象中的lastName属性相对应，这样可以映射成功 -->
+<!--        <setting name="mapUnderScoreToCamelCaseEnables" value="true"/>-->
+    </settings>
+
+
+
+<!--    定义别名-->
+<!--    方式一：-->
+    <typeAliases>
+<!--        可以指定一个类型一个自定义别名
+              type:自定义类型的全限定名称
+              alias：别名
+-->
+<!--        <typeAlias type="com.bjpowdernode.domain.Student" alias="stu"></typeAlias>-->
+
+
+<!--        方式二：-->
+<!--        name是包名，这个包中的所有类，类名就是别名(类名不区分大小写)-->
+        <package name="com.bjpowdernode.domain"/>
+    </typeAliases>
+
+<!--    分页插件-->
+    <plugins>
+        <plugin interceptor="com.github.pagehelper.PageInterceptor"/>
+    </plugins>
+
+    <environments default="">
+        <environment id="">
+            <transactionManager type="JDBC"/>
+            <dataSource type="POOLED">
+                <property name="driver" value="${jdbc.driver}"/>
+                <property name="url" value="${jdbc.url}"/>
+                <property name="username" value="${jdbc.username}"/>
+                <property name="password" value="${jdbc.password}"/>
+            </dataSource>
+        </environment>
+    </environments>
+
+    <mappers>
+<!--        第一种方式: 指定多个mapper文件-->
+        <mapper resource="com/bjpowdernode/dao/StudentDao.xml"/>
+<!--        第二种方式: 使用包名  name表示xml文件(mapper文件所在的包名) 这个包中的所有xml文件一次都能加载给mybatis
+                      使用package标签的要求:
+                        1.mapper文件名称需要和接口名称一样.区分大小写
+                        2.mapper文件和dao接口需要在统一目录下.
+                        -->
+<!--        <package name="com.bjpowdernode.dao"/>-->
+    </mappers>
+
+</configuration>

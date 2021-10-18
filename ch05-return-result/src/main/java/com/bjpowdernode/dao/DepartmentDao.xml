@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bjpowdernode.dao.DepartmentDao">
+    <select id="selectDepartmentById" resultType="com.bjpowdernode.domain.Department">
+        select * from department where id = #{id}
+    </select>
+
+
+<!--  dao层方法：  Department getDepartmentByIdPlus(Integer id); -->
+
+<!--    嵌套结果集的方式：使用collection标签定义关联的集合类型的属性封装规则-->
+    <resultMap id="mymap" type="com.bjpowdernode.domain.Department">
+        <id column="did" property="id"></id>
+        <result column="dname" property="name"></result>
+<!--        collection定义关联集合类型的属性封装规则。
+               因为一个部门对应中多个员工，所以我们需要通过collection来进行封装数据
+               一对多的情况
+-->
+<!--        property对应的是Department类中的属性集合的引用
+            ofType：对应的是Department类中的集合中的元素的类型
+-->
+        <collection property="students" ofType="com.bjpowdernode.domain.Student1">
+<!--定义这个集合中的元素的封装规则-->
+            <id column="sid" property="id"></id>
+            <result column="sname" property="name"></result>
+            <result column="semail" property="email"></result>
+            <result column="sage" property="age"></result>
+        </collection>
+    </resultMap>
+
+    <select id="getDepartmentByIdPlus" resultMap="mymap">
+        select d.id did, d.name dname,s.id sid , s.name sname,
+          s.email semail , s.age sage from department d
+          left join student s on d.id = s.d_id
+          where d.id = #{id}
+    </select>
+
+
+<!--    Department getDepartmentByIdStep(Integer id);-->
+    <resultMap id="mymap2" type="com.bjpowdernode.domain.Department">
+        <id column="id" property="id"></id>
+        <result column="name" property="name"></result>
+        <!--column的值为id，这个id是department数据库表的id，它作为属性select中的sql语句中所需要的参数，通过com.bjpowdernode.dao.StudentDao
+        中的selectStudentById方法来查询所有该部门下的所有学生-->
+<!--        <collection property="students"-->
+<!--                    select="com.bjpowdernode.dao.StudentDao.getStudentsByDeptId"-->
+<!--                    column="id">-->
+<!--        </collection>-->
+
+        <!--    扩展：上面的collection例子都是传递一个值到属性select方法中作为参数，当需要传递多个值到select方法中，我们可以
+使用 column="{key1=column1,key2=column2}"
+
+           fetchType=”lazy"  表示使用延迟加载
+                   属性值：lazy  延迟加载    eager：立即加载
+            即使在主配置文件中，定义了延迟加载，但是我们在标签中定义属性值为eager，让其立即加载。
+           -->
+        <collection property="students"
+                    select="com.bjpowdernode.dao.StudentDao.getStudentsByDeptId"
+                    column="{departmentId=id}"
+                    fetchType="eager">
+<!--column使用{}的形式可以传递多个值，departmentId是select方法中形参名（定义在StudentDao的xml文件中）-->
+
+
+<!--            鉴别器，mybatis可以使用discriminator判断某列的值，然后根据某列的值改变封装行为
+
+
+-->
+        </collection>
+    </resultMap>
+
+    <select id="getDepartmentByIdStep" resultMap="mymap2">
+        select * from department where id = #{id}
+    </select>
+</mapper>

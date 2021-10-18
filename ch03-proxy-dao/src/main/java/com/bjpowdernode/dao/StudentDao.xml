@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bjpowdernode.dao.StudentDao">
+
+    <select id="selectStudents" resultType="com.bjpowdernode.domain.Student">
+        select * from student;
+    </select>
+
+    <insert id="insertStudent">
+        insert into student values(#{id},#{name},#{email},#{age})
+    </insert>
+
+    <update id="updateStudent">
+        update student set name =#{name},email=#{email},age=#{age}
+        where id = #{id}
+    </update>
+
+    <delete id="deleteStudent">
+        delete from student where id = #{stuid}
+    </delete>
+
+<!--    主键是自增的，无需在对主键进行赋值操作。-->
+    <insert id="insertGene" useGeneratedKeys="true" keyProperty="id">
+        <selectKey keyProperty="id" resultType="int" order="AFTER">
+            select LAST_INSERT_ID()
+        </selectKey>
+        insert into student(name,email,age) values (#{name},#{email},#{age})
+    </insert>
+</mapper>

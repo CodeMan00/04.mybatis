@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bjpowdernode.dao.StudentDao">
+<!--    这是mybatis自带的cache缓存机制-->
+<!--    <cache eviction="FIFO" flushInterval="60000" readOnly="false" size="1024" ></cache>-->
+
+
+<!-- 使用第三方的缓存机制    -->
+    <cache type="org.mybatis.caches.ehcache.EhcacheCache"></cache>
+
+
+<!--        属性：
+                evication：缓存的回收策略，
+                    值：
+                        LRU(最近最少使用的)：移除最长时间不被使用的对象，默认值。
+                        FIFO(先进先出)：按对象进入缓存的顺序移除它们
+                        SOFT(软引用)：移除基于垃圾回收器状态和软引用规则的对象
+                        WEAK(弱引用)：更积极的移除基于垃圾回收器状态和弱引用规则的对象
+
+                 flushInterval： 缓存刷新间隔，缓存多长时间清空一次，设置毫秒值，默认是不清空
+
+                readOnly：是否只读
+                        值：true：只读    mybatis认为所有从缓存中获取数据的操作都是只读操作，不会修改数据
+                                        mybatis为了加快获取速度，直接就会将数据在缓冲中的引用交给用户。
+                           false：非只读    mybatis觉得获取的数据可能会被修改，所以它会利用序列化和反序列化
+                                            技术克隆一份新的数据给用户。  默认是是false，速度慢，但是安全。
+
+                 size:缓存存放多少元素。
+
+                 type: 指定自定义缓存的全类名
+
+                        -->
+
+
+    <select id="selectById" resultType="com.bjpowdernode.domain.Student">
+        select * from student where id = #{id}
+    </select>
+
+
+    <insert id="addStudent">
+        insert into student values (#{id},#{name},#{email},#{age})
+    </insert>
+
+</mapper>

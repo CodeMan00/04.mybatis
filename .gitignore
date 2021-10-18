@@ -1,0 +1,9 @@
+# Project exclude paths
+/ch01-hello-mybatis/target/
+/ch02-mybatis-dao/target/
+/ch03-proxy-dao/target/
+/ch04-param/target/
+/ch05-return-result/target/
+/ch06-dynamic-sql/target/
+/ch07-innerparameter/target/
+/ch08-cache/target/

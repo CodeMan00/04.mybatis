@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+
+    <settings>
+        <setting name="logImpl" value="STDOUT_LOGGING"/>
+<!--        开启懒加载（延迟加载）-->
+        <setting name="lazyLoadingEnabled" value="true"/>
+        <!-- 将积极加载改为消极加载(及按需加载) -->
+        <setting name="aggressiveLazyLoading" value="false"/>
+    </settings>
+
+<!--    定义别名-->
+    
+<!--    方式一：-->
+    <typeAliases>
+<!--        可以指定一个类型一个自定义别名
+              type:自定义类型的全限定名称
+              alias：别名
+-->
+<!--        <typeAlias type="com.bjpowdernode.domain.Student" alias="stu"></typeAlias>-->
+
+
+<!--        方式二：-->
+<!--        name是包名，这个包中的所有类，类名就是别名(类名不区分大小写)-->
+        <package name="com.bjpowdernode.domain"/>
+    </typeAliases>
+
+
+    <environments default="test">
+        <environment id="development">
+            <transactionManager type="JDBC"/>
+            <dataSource type="POOLED">
+                <property name="driver" value="com.mysql.jdbc.Driver"/>
+                <property name="url" value="jdbc:mysql://localhost:3306/mybatis"/>
+                <property name="username" value="root"/>
+                <property name="password" value="123456"/>
+            </dataSource>
+        </environment>
+
+<!--        懒加载测试在这个数据库中，使用Studnet表和Department表-->
+        <environment id="test">
+            <transactionManager type="JDBC"/>
+            <dataSource type="POOLED">
+                <property name="driver" value="com.mysql.jdbc.Driver"/>
+                <property name="url" value="jdbc:mysql://localhost:3306/jpa_test"/>
+                <property name="username" value="root"/>
+                <property name="password" value="123456"/>
+            </dataSource>
+        </environment>
+    </environments>
+
+    <mappers>
+<!--        <mapper resource="com/bjpowdernode/dao/StudentDao.xml"/>-->
+<!--        <mapper resource="com/bjpowdernode/dao/DepartmentDao.xml"/>-->
+        <package name="com.bjpowdernode.dao"/>
+    </mappers>
+
+</configuration>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bjpowdernode.dao.StudentDao">
+
+    <select id="selectStudents" resultType="com.bjpowdernode.domain.Student">
+        select * from student;
+    </select>
+
+<!--    databaseId表示该条select语句在mysql数据库中进行查询
+
+下面两个insert标签，它们的是同一个方法的insert标签，它们的区别就是一个带有databaseId标签，另一个不带databaseId，
+ mybatis会舍弃不带有databaseId属性的那个insert标签。
+-->
+    <insert id="insertStudent" databaseId="mysql">
+        insert into student values(#{id},#{name},#{email},#{age})
+    </insert>
+
+    <insert id="insertStudent">
+        insert into student values(#{id},#{name},#{email},#{age})
+    </insert>
+
+</mapper>
